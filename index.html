@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1118">
+<title>Rafa Amin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0b1118;
+    --ink: #f4f7f8;
+    --muted: #9eacb8;
+    --accent: #8ce4d0;
+    --accent2: #a6baff;
+    --glass: rgba(255,255,255,.075);
+    --stroke: rgba(255,255,255,.13);
+  }
+  * { box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; margin: 0; }
+  body {
+    overflow: hidden;
+    color: var(--ink);
+    font-family: 'Manrope', 'Plus Jakarta Sans', system-ui, sans-serif;
+    background:
+      radial-gradient(ellipse at 14% 10%, rgba(53,155,139,.20), transparent 34%),
+      radial-gradient(ellipse at 90% 82%, rgba(89,108,190,.20), transparent 36%),
+      linear-gradient(135deg, #0a1118 0%, #101b26 52%, #0b121b 100%);
+  }
+  .backdrop { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+  .blob {
+    position: absolute; width: 42vw; height: 42vw; min-width: 230px; min-height: 230px;
+    border-radius: 50%; filter: blur(75px); opacity: .22;
+    background: #3ac6a9; animation: drift 16s ease-in-out infinite alternate;
+  }
+  .blob.b2 { width: 35vw; height: 35vw; right: -8%; bottom: -15%; background: #657ce5; animation-delay: -7s; }
+  .blob.b3 { width: 20vw; height: 20vw; left: 43%; top: 45%; background: #c17da9; opacity: .12; animation-delay: -4s; }
+  .grain {
+    position: absolute; inset: 0; opacity: .055; mix-blend-mode: screen;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+  }
+  .page {
+    position: relative; z-index: 1; width: 100%; height: 100svh;
+    min-height: 0; display: flex; flex-direction: column;
+    padding: max(18px, env(safe-area-inset-top)) clamp(14px, 3vw, 34px) max(14px, env(safe-area-inset-bottom));
+    gap: clamp(12px, 2.2vh, 22px);
+  }
+  header {
+    flex: 0 0 auto; min-height: 70px; display: flex; align-items: center; justify-content: center;
+    position: relative; text-align: center;
+  }
+  .name-wrap { animation: nameIn .85s cubic-bezier(.2,.8,.2,1) both; }
+  .tiny-label {
+    display: block; margin-bottom: 5px; color: var(--accent);
+    font-size: 9px; font-weight: 800; letter-spacing: .27em; text-transform: uppercase;
+  }
+  h1 {
+    margin: 0; font-family: 'Plus Jakarta Sans', 'Manrope', system-ui, sans-serif;
+    font-size: clamp(30px, 5vw, 48px); line-height: 1.08; letter-spacing: -.055em;
+    font-weight: 800; color: #f5f8fb;
+    text-shadow: 0 5px 30px rgba(140,228,208,.12);
+  }
+  h1 span {
+    background: linear-gradient(100deg, #8ce4d0 5%, #b5c9ff 95%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .gallery-shell {
+    flex: 1 1 auto; min-height: 0; width: min(100%, 1180px); margin: 0 auto;
+    padding: clamp(7px, 1.4vw, 14px);
+    border: 1px solid var(--stroke); border-radius: clamp(20px, 3vw, 30px);
+    background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(255,255,255,.025));
+    box-shadow: 0 25px 80px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.11);
+    backdrop-filter: blur(26px) saturate(135%);
+    -webkit-backdrop-filter: blur(26px) saturate(135%);
+    overflow: hidden; position: relative;
+  }
+  .gallery-shell::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(115deg, transparent 15%, rgba(255,255,255,.065) 48%, transparent 67%);
+    transform: translateX(-120%); animation: glassPass 9s ease-in-out 1.5s infinite;
+  }
+  .gallery {
+    position: relative; width: 100%; height: 100%; min-height: 0;
+    display: grid; gap: clamp(7px, 1.3vw, 14px);
+    align-content: stretch;
+  }
+  .photo {
+    min-width: 0; min-height: 0; position: relative; overflow: hidden;
+    border-radius: clamp(13px, 2vw, 22px);
+    border: 1px solid rgba(255,255,255,.17);
+    background: linear-gradient(145deg, rgba(255,255,255,.11), rgba(255,255,255,.025));
+    box-shadow: 0 12px 32px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.13);
+    opacity: 0; transform: translateY(16px) scale(.985);
+    animation: photoIn .72s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  .photo img {
+    display: block; width: 100%; height: 100%; object-fit: cover;
+    transition: transform .75s cubic-bezier(.2,.8,.2,1), filter .75s;
+  }
+  .photo:hover img { transform: scale(1.035); filter: saturate(1.08) brightness(1.04); }
+  .photo::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(145deg, rgba(255,255,255,.10), transparent 28%, transparent 72%, rgba(0,0,0,.13));
+  }
+  .empty {
+    height: 100%; display: grid; place-items: center; text-align: center; padding: 24px;
+    color: var(--muted); font-size: 14px; font-weight: 600; line-height: 1.7;
+  }
+  .empty .star { display: block; color: var(--accent); font-size: 26px; margin-bottom: 9px; }
+  footer {
+    flex: 0 0 auto; min-height: 15px; text-align: center; color: #7f909e;
+    font-size: 9px; font-weight: 700; letter-spacing: .19em; text-transform: uppercase;
+  }
+  #status { display: none; }
+  @keyframes drift { from { transform: translate3d(-5%, -3%, 0) scale(.9); } to { transform: translate3d(12%, 10%, 0) scale(1.12); } }
+  @keyframes nameIn { from { opacity: 0; transform: translateY(-13px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+  @keyframes photoIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes glassPass { 0%,16% { transform: translateX(-120%); } 45%,100% { transform: translateX(120%); } }
+  @media (max-width: 560px) {
+    .page { gap: 12px; padding-left: 11px; padding-right: 11px; }
+    header { min-height: 66px; }
+    .gallery-shell { border-radius: 21px; }
+  }
+  @media (max-height: 570px) {
+    .page { gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+    header { min-height: 52px; }
+    .tiny-label { font-size: 8px; margin-bottom: 2px; }
+    h1 { font-size: clamp(25px, 5vh, 34px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="backdrop"><div class="blob"></div><div class="blob b2"></div><div class="blob b3"></div><div class="grain"></div></div>
+<main class="page">
+  <header>
+    <div class="name-wrap">
+      <span class="tiny-label">A little gallery for</span>
+      <h1>Rafa <span>Amin</span></h1>
+    </div>
+  </header>
+
+  <section class="gallery-shell" aria-label="Rafa's photo gallery">
+    <div class="gallery" id="gallery">
+      <div class="empty"><div><span class="star">✦</span>Your photos will appear here.</div></div>
+    </div>
+  </section>
+
+  <footer>Made just for you <span style="color:#8ce4d0">✦</span><span id="status"></span></footer>
+</main>
+<script>
+  /*
+    BACKEND CONTRACT
+    GET /api/photos
+    Response: { "photos": ["/media/photo-1.jpg", "/media/photo-2.jpg"] }
+
+    The Telegram bot uploads photos to backend storage.
+    The backend returns the public image URLs in this endpoint.
+    Keep bot tokens and signing secrets on the backend only.
+  */
+  const API_URL = "/api/photos";
+  const gallery = document.getElementById("gallery");
+
+  function renderPhotos(photos) {
+    gallery.innerHTML = "";
+    if (!Array.isArray(photos) || photos.length === 0) {
+      gallery.style.gridTemplateColumns = "1fr";
+      gallery.style.gridTemplateRows = "1fr";
+      gallery.innerHTML = '<div class="empty"><div><span class="star">✦</span>Your photos will appear here.</div></div>';
+      return;
+    }
+
+    // Fit the complete collection inside the visible screen—no page scrolling.
+    const count = photos.length;
+    const mobile = window.matchMedia("(max-width: 560px)").matches;
+    const columns = count === 1 ? 1 : count === 2 ? 2 : mobile ? 2 : Math.min(3, Math.ceil(Math.sqrt(count * 1.25)));
+    const rows = Math.ceil(count / columns);
+    gallery.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+    gallery.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;
+
+    photos.forEach((url, index) => {
+      const card = document.createElement("div");
+      card.className = "photo";
+      card.style.animationDelay = `${Math.min(index * 75, 700)}ms`;
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = "Photo for Rafa";
+      img.loading = "eager";
+      img.onerror = () => {
+        card.remove();
+        fitGrid();
+      };
+      card.appendChild(img);
+      gallery.appendChild(card);
+    });
+  }
+
+  function fitGrid() {
+    const count = gallery.querySelectorAll(".photo").length;
+    if (!count) return;
+    const mobile = window.matchMedia("(max-width: 560px)").matches;
+    const columns = count === 1 ? 1 : count === 2 ? 2 : mobile ? 2 : Math.min(3, Math.ceil(Math.sqrt(count * 1.25)));
+    gallery.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+    gallery.style.gridTemplateRows = `repeat(${Math.ceil(count / columns)}, minmax(0, 1fr))`;
+  }
+
+  async function loadPhotos() {
+    try {
+      const response = await fetch(API_URL, { cache: "no-store" });
+      if (!response.ok) throw new Error("Photo endpoint unavailable");
+      const data = await response.json();
+      renderPhotos(data.photos || []);
+    } catch {
+      if (!gallery.querySelector(".photo")) {
+        gallery.innerHTML = '<div class="empty"><div><span class="star">✦</span>Your photo gallery is ready.</div></div>';
+      }
+    }
+  }
+
+  loadPhotos();
+  setInterval(loadPhotos, 15000);
+  window.addEventListener("resize", fitGrid);
+</script>
+</body>
+</html>
